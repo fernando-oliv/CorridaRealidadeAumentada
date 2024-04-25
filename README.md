@@ -1,6 +1,6 @@
 # CorridaRealidadeAumentada
 
-Projeto de TCC que envolve um jogo de RA de corrida que utiliza imagens de pistas desenhadas em um quadro branco e um projetor para projetar o carro do player e um oponente npc em cima dos desenhos feitos na vida real.
+Projeto de TCC feito em Pygame que envolve um jogo de RA de corrida que utiliza imagens de pistas desenhadas em um quadro branco e um projetor para projetar o carro do player e um oponente npc em cima dos desenhos feitos na vida real.
 
 ### Breve descrição do funcionamento do jogo :
 
