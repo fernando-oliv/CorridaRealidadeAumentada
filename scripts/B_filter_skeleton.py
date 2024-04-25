@@ -49,9 +49,9 @@ grad[grad > 0] = 1
 grad2 = grad.copy()
 cv2.floodFill(grad2, None, (150, 200), 1)
 
-kernel = np.asarray([[1, 1, 1],
-                     [1, 1, 1],
-                     [1, 1, 1]])
+kernel = np.asarray([[0, 1, 0],
+                     [1, 1, 0],
+                     [0, 1, 0]], dtype=np.uint8)
 
 
 grad2 = cv2.dilate(grad2, kernel, iterations = 10)
@@ -70,7 +70,7 @@ grad *= 255
 
 result[:,:,3] = grad[:,:]
 
-print(pathInt)
 
-cv2.imwrite('temp1.png', result)
-cv2.imwrite('path1.png', pathInt)
+
+cv2.imwrite('track_border.png', result)
+cv2.imwrite('npc_path_line.png', pathInt)

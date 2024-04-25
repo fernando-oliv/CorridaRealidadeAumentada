@@ -7,11 +7,13 @@ class AbstractCar:
         self.img = img
         self.max_vel = max_vel
         self.vel = 0
+        self.laps = 0
         self.rotation_vel = rotation_vel
         self.angle = 0
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
         self.rotated_image = self.img
+        self.flag_finish_line = False
         self.future_rect = pygame.Rect(self.x, self.y, self.img.get_width(), self.img.get_height())
 
     def rotate(self, left=False, right=False):
@@ -52,6 +54,8 @@ class AbstractCar:
         self.x, self.y = self.START_POS
         self.angle = 0
         self.vel = 0
+        self.laps = 0
+        self.flag_finish_line = False
     
 
 class PlayerCar(AbstractCar):
@@ -85,7 +89,7 @@ class ComputerCar(AbstractCar):
         super().__init__(max_vel, rotation_vel, img)
         self.path = path
         self.current_point = 0
-        self.vel = max_vel
+        self.vel = 1.6 * max_vel
 
     def draw_points(self, win):
         for point in self.path:
@@ -93,7 +97,7 @@ class ComputerCar(AbstractCar):
 
     def draw(self, win):
         super().draw(win)
-        # self.draw_points(win)
+        #self.draw_points(win)
 
     def calculate_angle(self):
         target_x, target_y = self.path[self.current_point]
@@ -122,7 +126,10 @@ class ComputerCar(AbstractCar):
         rect = pygame.Rect(
             self.x, self.y, self.img.get_width(), self.img.get_height())
         if rect.collidepoint(*target):
-            self.current_point += 1
+            if self.current_point == len(self.path) - 1:
+                self.current_point = 0
+            else:
+                self.current_point += 1
 
     def move(self):
         if self.current_point >= len(self.path):
@@ -135,5 +142,5 @@ class ComputerCar(AbstractCar):
 
     def next_level(self, level):
         self.reset()
-        self.vel = self.max_vel + (level - 1) * 0.2
+        self.vel = 1.5 * self.max_vel + (level - 1) * 0.2
         self.current_point = 0

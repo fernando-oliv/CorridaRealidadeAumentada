@@ -5,7 +5,7 @@ from pygame.locals import *
 from scipy.signal import correlate
 from PIL import Image
 import tkinter
-from player import Player
+from game.cars import Player
 from game import App
 import cv2
 
