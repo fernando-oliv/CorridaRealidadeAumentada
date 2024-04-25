@@ -7,7 +7,7 @@ Projeto de TCC que envolve um jogo de RA de corrida que utiliza imagens de pista
 
 1. É capturada uma imagem de uma pista desenhada em um quadro branco ( melhor exemplo é este [arquivo](pictures/IMG_20240419_134307~2.jpg) ).
 2. A imagem é redimensionada para a resolução HD (1280 x 720 px)
-3. Um filtro gaussiano é aplicado (redução de ruído) e, em seguida, é aplicado um filtro de sobel para detecção das bordas da pista que será salva em um arquivo
+3. Um filtro gaussiano é aplicado (redução de ruído) e, em seguida, é aplicado um filtro de sobel para detecção da borda da pista que será salva em um arquivo
 4. A região interna da pista é preenchida, dilatada e esqueletonizada para a obtenção do caminho central que será percorrido pelo oponente npc (também será salvo em um arquivo).
 5. A posição da linha de chegada é definida pelo clique do mouse em cima da imagem da borda da pista gerada.
 6. Usando o passo anterior e os arquivos gerados, o jogo é iniciado.
