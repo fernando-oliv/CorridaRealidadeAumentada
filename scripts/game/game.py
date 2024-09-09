@@ -7,7 +7,6 @@ def findClosestIndex(PATH, m, n):
     minX, minY = PATH[0]
     idx = 0
     for i in range(len(PATH)):
-        print(i)
         x, y = PATH[i]
         x = abs(x - m)
         y = abs(y - n)
@@ -26,6 +25,7 @@ class GameInfo:
         self.started = False
         self.level_start_time = 0
         self.inputs = [0, 0] #[vertical, horizontal]
+        self.inputs2 = [0, 0] #[vertical, horizontal]
 
     def next_level(self):
         self.level += 1
@@ -60,6 +60,10 @@ class GameInfo:
         self.inputs[0] += -1 * self.value_keys(keys[pygame.K_s])
         self.inputs[1] = self.value_keys(keys[pygame.K_d])
         self.inputs[1] += -1 * self.value_keys(keys[pygame.K_a])
+        self.inputs2[0] = self.value_keys(keys[pygame.K_UP])
+        self.inputs2[0] += -1 * self.value_keys(keys[pygame.K_DOWN])
+        self.inputs2[1] = self.value_keys(keys[pygame.K_RIGHT])
+        self.inputs2[1] += -1 * self.value_keys(keys[pygame.K_LEFT])
         
 
 class ImagesInfos:
@@ -72,11 +76,14 @@ class ImagesInfos:
 
     def draw(self, win, images, player_car, computer_car, game_info):
         win.fill((0,0,0), None, 0)
+        currentLap = player_car.laps
+        if computer_car.laps > player_car.laps:
+            lap = computer_car.laps
         for img, pos in images:
             win.blit(img, pos)
 
         level_text = self.font.render(
-            f"Lap {player_car.laps + 1}/3", 1, (255, 0, 0))
+            f"Lap {currentLap + 1}/3", 1, (255, 0, 0))
         win.blit(level_text, (10, self.height - level_text.get_height() - 70))
 
         time_text = self.font.render(
@@ -93,18 +100,22 @@ class ImagesInfos:
         pygame.display.update()
 
 
-def move_player(player_car, game_info):
+def move_player(player_car, game_info, player1):
     
     moved = False
-
-    if game_info.inputs[1] < 0:
+    if player1:
+        input = game_info.inputs
+    else:
+        input = game_info.inputs2
+    
+    if input[1] < 0:
         player_car.rotate(left=True)
-    if game_info.inputs[1] > 0:
+    if input[1] > 0:
         player_car.rotate(right=True)
-    if game_info.inputs[0] > 0:
+    if input[0] > 0:
         moved = True
         player_car.move_forward()
-    if game_info.inputs[0] < 0:
+    if input[0] < 0:
         moved = True
         player_car.move_backward()
 
@@ -118,32 +129,32 @@ def move_player(player_car, game_info):
 def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
     
     game_info.get_inputs()
-    move_player(player_car, game_info) 
+    move_player(player_car, game_info, True)
+    move_player(computer_car, game_info, False)
                         
-    computer_car.move()
+    #computer_car.move()
+
+
+    #computer_finish_poi_collide = computer_car.collide(
+#        imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
+#    if computer_finish_poi_collide != None:
+#        if computer_car.flag_finish_line == False:
+#            computer_car.laps += 1
+#            computer_car.flag_finish_line = True
+
+#        if computer_car.laps >= 3:
+#            blit_text_center(WIN, imgs_info.font, "You lost!")
+#            pygame.display.update()
+#            pygame.time.wait(5000)
+#            game_info.reset()
+#            player_car.reset()
+#            computer_car.reset()
+        
+#    else:
+#        computer_car.flag_finish_line = False
 
     if player_car.collide(imgs_info.TRACK_BORDER_MASK) != None:
-        
         player_car.bounce(game_info.inputs[0], game_info.inputs[1])
-
-    computer_finish_poi_collide = computer_car.collide(
-        imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
-    if computer_finish_poi_collide != None:
-        if computer_car.flag_finish_line == False:
-            computer_car.laps += 1
-            computer_car.flag_finish_line = True
-
-        if computer_car.laps >= 3:
-            blit_text_center(WIN, imgs_info.font, "You lost!")
-            pygame.display.update()
-            pygame.time.wait(5000)
-            game_info.reset()
-            player_car.reset()
-            computer_car.reset()
-        
-    else:
-        computer_car.flag_finish_line = False
-
 
     player_finish_poi_collide = player_car.collide(
         imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
@@ -158,9 +169,31 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
             if player_car.laps >= 3:
                 game_info.next_level()
                 player_car.reset()
-                computer_car.next_level(game_info.level)
     else:
         player_car.flag_finish_line = False
+
+    
+
+
+    if computer_car.collide(imgs_info.TRACK_BORDER_MASK) != None:
+        computer_car.bounce(game_info.inputs[0], game_info.inputs[1])
+
+    player_finish_poi_collide = computer_car.collide(
+        imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
+    if player_finish_poi_collide != None:
+        if player_finish_poi_collide[1] == 0:
+            #computer_car.bounce(game_info.inputs2[0], game_info.inputs2[1])
+            pass
+        else:
+            if computer_car.flag_finish_line == False:
+                computer_car.laps += 1
+                computer_car.flag_finish_line = True
+            if computer_car.laps >= 3:
+                game_info.next_level()
+                computer_car.reset()
+                
+    else:
+        computer_car.flag_finish_line = False
 
 
 def run_game(trackpath, lista):
@@ -212,7 +245,8 @@ def run_game(trackpath, lista):
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
 
     player_car = PlayerCar(150, 200, 4, 4, RED_CAR)
-    computer_car = ComputerCar(135, 200, 2, 4, GREEN_CAR, PATH)
+    #computer_car = ComputerCar(135, 200, 2, 4, GREEN_CAR, PATH)
+    computer_car = PlayerCar(150, 200, 4, 4, GREEN_CAR)
     imgs_info = ImagesInfos(MAIN_FONT, HEIGHT, TRACK_BORDER_MASK, FINISH_MASK, FINISH_POSITION)
     game_info = GameInfo()
 
@@ -243,7 +277,8 @@ def run_game(trackpath, lista):
     print("finish : ", FINISH_POSITION)
     print("Path : ", PATH[0])
     player_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 4, 4, RED_CAR)
-    computer_car = ComputerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 2, 4, GREEN_CAR, tmp)
+    #computer_car = ComputerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 2, 4, GREEN_CAR, tmp)
+    computer_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 4, 4, GREEN_CAR)
     #computer_car.path = tmp
     computer_car.x, computer_car.y = player_car.x, player_car.y
     while run:
@@ -273,6 +308,8 @@ def run_game(trackpath, lista):
             
 
         handle_collision(player_car, computer_car, game_info, imgs_info, WIN)
+        if game_info.game_finished() == True:
+            print('deveria ter acabado')
 
         if game_info.game_finished():
             blit_text_center(WIN, MAIN_FONT, "You won the game!")
@@ -280,6 +317,7 @@ def run_game(trackpath, lista):
             game_info.reset()
             player_car.reset()
             computer_car.reset()
+            break
 
 
     pygame.quit()
