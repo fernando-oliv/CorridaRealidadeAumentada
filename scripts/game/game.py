@@ -76,7 +76,7 @@ class ImagesInfos:
 
     def draw(self, win, images, player_car, computer_car, game_info):
         win.fill((0,0,0), None, 0)
-        currentLap = player_car.laps
+        currentLap = player_car.laps if player_car.laps > computer_car.laps else computer_car.laps
         if computer_car.laps > player_car.laps:
             lap = computer_car.laps
         for img, pos in images:
@@ -159,9 +159,8 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
     player_finish_poi_collide = player_car.collide(
         imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
     if player_finish_poi_collide != None:
-        if player_finish_poi_collide[1] == 0:
-            #player_car.bounce(game_info.inputs[0], game_info.inputs[1])
-            pass
+        if player_finish_poi_collide[1] == 0 and not player_car.flag_finish_line:
+            player_car.bounce(game_info.inputs[0], game_info.inputs[1])
         else:
             if player_car.flag_finish_line == False:
                 player_car.laps += 1
@@ -172,7 +171,8 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
     else:
         player_car.flag_finish_line = False
 
-    
+
+
 
 
     if computer_car.collide(imgs_info.TRACK_BORDER_MASK) != None:
@@ -181,9 +181,8 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
     player_finish_poi_collide = computer_car.collide(
         imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
     if player_finish_poi_collide != None:
-        if player_finish_poi_collide[1] == 0:
-            #computer_car.bounce(game_info.inputs2[0], game_info.inputs2[1])
-            pass
+        if player_finish_poi_collide[1] == 0 and not computer_car.flag_finish_line:
+            computer_car.bounce(game_info.inputs2[0], game_info.inputs2[1])
         else:
             if computer_car.flag_finish_line == False:
                 computer_car.laps += 1
@@ -308,12 +307,10 @@ def run_game(trackpath, lista):
             
 
         handle_collision(player_car, computer_car, game_info, imgs_info, WIN)
-        if game_info.game_finished() == True:
-            print('deveria ter acabado')
 
         if game_info.game_finished():
             blit_text_center(WIN, MAIN_FONT, "You won the game!")
-            pygame.time.wait(5000)
+            #pygame.time.wait(5000)
             game_info.reset()
             player_car.reset()
             computer_car.reset()
