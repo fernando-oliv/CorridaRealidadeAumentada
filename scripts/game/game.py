@@ -26,6 +26,7 @@ class GameInfo:
         self.level_start_time = 0
         self.inputs = [0, 0] #[vertical, horizontal]
         self.inputs2 = [0, 0] #[vertical, horizontal]
+        self.player_vencedor = "Ninguem"
 
     def next_level(self):
         self.level += 1
@@ -167,6 +168,7 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
                 player_car.flag_finish_line = True
             if player_car.laps >= 3:
                 game_info.next_level()
+                game_info.player_vencedor = "Vermelho"
                 player_car.reset()
     else:
         player_car.flag_finish_line = False
@@ -189,6 +191,7 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
                 computer_car.flag_finish_line = True
             if computer_car.laps >= 3:
                 game_info.next_level()
+                game_info.player_vencedor = "Verde"
                 computer_car.reset()
                 
     else:
@@ -200,27 +203,27 @@ def run_game(trackpath, lista):
 
     pygame.font.init()
 
-    GRASS = scale_image(pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/grass.jpg"), 2.5)
+    GRASS = scale_image(pygame.image.load("sprites/grass.jpg"), 2.5)
     #TRACK = scale_image(pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/track.png"), 0.9)
 
     TRACK_BORDER = scale_image(pygame.image.load(trackpath), 1.0)
     TRACK = TRACK_BORDER
     TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
 
-    FINISH = pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/finish.png")
+    FINISH = pygame.image.load("sprites/finish.png")
     FINISH_MASK = pygame.mask.from_surface(FINISH)
     FINISH_POSITION = (130, 250)
 
-    RED_CAR = scale_image(pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/cars/red-car.png"), 0.55)
-    GREEN_CAR = scale_image(pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/cars/green-car.png"), 0.55)
-    WHITE_CAR = scale_image(pygame.image.load("/home/fernando/git/CorridaRealidadeAumentada/sprites/cars/white-car.png"), 0.55)
+    RED_CAR = scale_image(pygame.image.load("sprites/cars/red-car.png"), 0.55)
+    GREEN_CAR = scale_image(pygame.image.load("sprites/cars/green-car.png"), 0.55)
+    WHITE_CAR = scale_image(pygame.image.load("sprites/cars/white-car.png"), 0.55)
 
     WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
     WIN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     print(WIDTH, HEIGHT)
     pygame.display.set_caption("Racing Game!")
 
-    MAIN_FONT = pygame.font.SysFont("comicsans", 44)
+    MAIN_FONT = pygame.font.Font("font.otf", 44)
 
     FPS = 60
     #PATH = [(175, 119), (110, 70), (56, 133), (70, 481), (318, 731), (404, 680), (418, 521), (507, 475), (600, 551), (613, 715), (736, 713),
@@ -309,16 +312,18 @@ def run_game(trackpath, lista):
         handle_collision(player_car, computer_car, game_info, imgs_info, WIN)
 
         if game_info.game_finished():
-            blit_text_center(WIN, MAIN_FONT, "You won the game!")
-            #pygame.time.wait(5000)
-            game_info.reset()
-            player_car.reset()
-            computer_car.reset()
+            blit_text_center(WIN, MAIN_FONT, game_info.player_vencedor + " ganhou a corrida")
+            pygame.display.update()
+            time.sleep(2.5)
+            #game_info.reset()
+            #player_car.reset()
+            #computer_car.reset()
             break
 
 
+    print("acabou aqui")
     pygame.quit()
 
 
 if __name__ == '__main__':
-    run_game('/home/fernando/git/CorridaRealidadeAumentada/sprites/track-border.png')
+    run_game('sprites/track-border.png')
