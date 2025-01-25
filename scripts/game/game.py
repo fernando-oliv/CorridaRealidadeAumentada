@@ -3,26 +3,14 @@ import time
 from game.cars import *
 from game.utils import scale_image, blit_text_center
 
-def findClosestIndex(PATH, m, n):
-    minX, minY = PATH[0]
-    idx = 0
-    for i in range(len(PATH)):
-        x, y = PATH[i]
-        x = abs(x - m)
-        y = abs(y - n)
-        if x + y < minX + minY:
-            minX, minY = x, y
-            idx = i
-
-    return idx
-
-
+WIDTH, HEIGHT = 0, 0
 class GameInfo:
     LEVELS = 1
 
     def __init__(self, level=1):
         self.level = level
         self.started = False
+        self.ajusted = False
         self.level_start_time = 0
         self.inputs = [0, 0] #[vertical, horizontal]
         self.inputs2 = [0, 0] #[vertical, horizontal]
@@ -74,30 +62,40 @@ class ImagesInfos:
         self.TRACK_BORDER_MASK = TRACK_BORDER_MASK
         self.FINISH_MASK = FINISH_MASK
         self.FINISH_POSITION = FINISH_POSITION
+        self.parametros = None
 
-    def draw(self, win, images, player_car, computer_car, game_info):
+    def set_dest(self, x, y):
+        self.dest_x = x
+        self.dest_y = y
+
+    def draw(self, win, images, player_car, computer_car, game_info, WIDTH, HEIGHT, ajusted):
         win.fill((0,0,0), None, 0)
+        tempWin = win.copy()
         currentLap = player_car.laps if player_car.laps > computer_car.laps else computer_car.laps
+        currentLap += 1
         if computer_car.laps > player_car.laps:
             lap = computer_car.laps
         for img, pos in images:
-            win.blit(img, pos)
+            tempWin.blit(img, pos)
 
-        level_text = self.font.render(
-            f"Lap {currentLap + 1}/3", 1, (255, 0, 0))
-        win.blit(level_text, (10, self.height - level_text.get_height() - 70))
+        level_text = self.font.render('Lap '+ str(currentLap) + '/3', 1, (255, 0, 0))
+        tempWin.blit(level_text, (10, self.height - level_text.get_height() - 70))
 
         time_text = self.font.render(
-            f"Time: {game_info.get_level_time()}s", 1, (255, 0, 0))
-        win.blit(time_text, (10, self.height - time_text.get_height() - 40))
+            "Time: " + str(game_info.get_level_time()) + "s", 1, (255, 0, 0))
+        tempWin.blit(time_text, (10, self.height - time_text.get_height() - 40))
 
         #vel_text = self.font.render(
         #    f"Vel: {round(player_car.vel, 1)}px/s", 1, (255, 255, 255))
         #win.blit(vel_text, (10, self.height - vel_text.get_height() - 10))
 
-        player_car.draw(win)
-        computer_car.draw(win)
+        player_car.draw(tempWin)
+        computer_car.draw(tempWin)
         #computer_car.draw_points(win)
+        if ajusted:
+            win.blit(pygame.transform.scale(tempWin, (WIDTH, HEIGHT)), (self.dest_x, self.dest_y))
+        else:
+            win.blit(pygame.transform.scale(tempWin, (WIDTH, HEIGHT)), (0, 0))
         pygame.display.update()
 
 
@@ -127,7 +125,7 @@ def move_player(player_car, game_info, player1):
 
 
 
-def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
+def handle_collision(player_car, computer_car, game_info, imgs_info):
     
     game_info.get_inputs()
     move_player(player_car, game_info, True)
@@ -198,9 +196,10 @@ def handle_collision(player_car, computer_car, game_info, imgs_info, WIN):
         computer_car.flag_finish_line = False
 
 
-def run_game(trackpath, lista):
+def run_game(trackpath):
 
-
+    pygame.init()
+    pygame.image.load("sprites/grass.jpg")
     pygame.font.init()
 
     GRASS = scale_image(pygame.image.load("sprites/grass.jpg"), 2.5)
@@ -226,34 +225,21 @@ def run_game(trackpath, lista):
     MAIN_FONT = pygame.font.Font("font.otf", 44)
 
     FPS = 60
-    #PATH = [(175, 119), (110, 70), (56, 133), (70, 481), (318, 731), (404, 680), (418, 521), (507, 475), (600, 551), (613, 715), (736, 713),
-    #        (734, 399), (611, 357), (409, 343), (433, 257), (697, 258), (738, 123), (581, 71), (303, 78), (275, 377), (176, 388), (178, 260)]
+    
 
-
-    PATH = lista
-
-    '''
-    PATH = PATH[749:] + PATH[0:749]
-    PATH.reverse()
-    tmp = []
-    for i in range(0, len(PATH), 100):
-        tmp.append(PATH[i])
-    PATH = tmp
-    PATH += PATH[0:10]
-    '''
+  
     run = True
     clock = pygame.time.Clock()
     images = [(TRACK, (0, 0)),
               (FINISH, FINISH_POSITION), (TRACK_BORDER, (0, 0))]
 
-    player_car = PlayerCar(150, 200, 4, 4, RED_CAR)
-    #computer_car = ComputerCar(135, 200, 2, 4, GREEN_CAR, PATH)
-    computer_car = PlayerCar(150, 200, 4, 4, GREEN_CAR)
+    player_car = PlayerCar(150, 200, 100, 4, RED_CAR)
+    computer_car = PlayerCar(150, 200, 100, 4, GREEN_CAR)
     imgs_info = ImagesInfos(MAIN_FONT, HEIGHT, TRACK_BORDER_MASK, FINISH_MASK, FINISH_POSITION)
     game_info = GameInfo()
 
     while(run):
-        imgs_info.draw(WIN, images, player_car, computer_car, game_info)
+        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, False)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -267,49 +253,80 @@ def run_game(trackpath, lista):
                 run = False
     run = True
 
-    i = findClosestIndex(PATH, FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 100)
-    parte1 = PATH[:i]
-    parte2 = PATH[i:]
-    parte1.reverse()
-    parte2.reverse()
-    PATH = parte1 + parte2
-    tmp = []
-    for i in range(0, len(PATH), 50):
-        tmp.append(PATH[i])
-    print("finish : ", FINISH_POSITION)
-    print("Path : ", PATH[0])
     player_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 4, 4, RED_CAR)
     #computer_car = ComputerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 2, 4, GREEN_CAR, tmp)
     computer_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 4, 4, GREEN_CAR)
     #computer_car.path = tmp
     computer_car.x, computer_car.y = player_car.x, player_car.y
+    scale = 1
+    dest_x, dest_y = 0, 0
+    #loop principal
     while run:
         clock.tick(FPS)
 
-        imgs_info.draw(WIN, images, player_car, computer_car, game_info)
+        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
+        #WIN.blit(pygame.transform.scale(WIN, (WIDTH, HEIGHT)), (0,0))
+
+        #aqui
+        i = 1
+        while not game_info.ajusted:
+            blit_text_center(
+                WIN, MAIN_FONT, "Ajuste a tela com as setas !")
+            keys = pygame.key.get_pressed()
+            i += 1
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    keys = pygame.key.get_pressed()
+                    if keys[pygame.K_p]:
+                        WIDTH = scale * WIDTH
+                        HEIGHT = scale * HEIGHT
+                        game_info.ajusted = True
+                        imgs_info.set_dest(dest_x, dest_y)
+                        images = images [:-1]
+                        break
+                    elif keys[pygame.K_w]:
+                        scale += 0.1
+                    elif keys[pygame.K_s]:
+                        if scale > 0.2:
+                            scale -= 0.1
+                    elif keys[pygame.K_LEFT]:
+                        dest_x -= 10
+                    elif keys[pygame.K_RIGHT]:
+                        dest_x += 10
+                    elif keys[pygame.K_UP]:
+                        dest_y -= 10
+                    elif keys[pygame.K_DOWN]:
+                        dest_y += 10
+                    #WIN = pygame.transform.scale(WIN, (WIDTH * scale, HEIGHT * scale))
+                    imgs_info.set_dest(dest_x, dest_y)
+                    imgs_info.draw(WIN, images, player_car, computer_car, game_info, int(WIDTH * scale), int(HEIGHT * scale), True)
+                    #WIN.blit(pygame.transform.scale(WIN, (WIDTH * scale, HEIGHT * scale)), (dest_x,dest_y))
+                    #pygame.display.update()
+                 
 
         while not game_info.started:
             blit_text_center(
-                WIN, MAIN_FONT, f"Press any key to start level {game_info.level}!")
+                WIN, MAIN_FONT, "Aperte P para começar " + str(game_info.level) + "!")
             pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     break
-                elif event.type == pygame.KEYDOWN: 
-                    game_info.start_level()
+                elif event.type == pygame.KEYDOWN:
+                    keys = pygame.key.get_pressed()
+                    keys = keys[pygame.K_p]
+                    if keys:
+                        game_info.start_level()
+                        print(WIDTH, HEIGHT)
                     
-
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
                 break
+   
 
-            
-
-        handle_collision(player_car, computer_car, game_info, imgs_info, WIN)
+        handle_collision(player_car, computer_car, game_info, imgs_info)
 
         if game_info.game_finished():
             blit_text_center(WIN, MAIN_FONT, game_info.player_vencedor + " ganhou a corrida")
@@ -318,8 +335,7 @@ def run_game(trackpath, lista):
             #game_info.reset()
             #player_car.reset()
             #computer_car.reset()
-            break
-
+            run = False
 
     print("acabou aqui")
     pygame.quit()
