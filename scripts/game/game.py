@@ -68,6 +68,9 @@ class ImagesInfos:
         self.dest_x = x
         self.dest_y = y
 
+    def set_angle(self, x):
+        self.angle = x
+
     def draw(self, win, images, player_car, computer_car, game_info, WIDTH, HEIGHT, ajusted):
         win.fill((0,0,0), None, 0)
         tempWin = win.copy()
@@ -93,7 +96,7 @@ class ImagesInfos:
         computer_car.draw(tempWin)
         #computer_car.draw_points(win)
         if ajusted:
-            win.blit(pygame.transform.scale(tempWin, (WIDTH, HEIGHT)), (self.dest_x, self.dest_y))
+            win.blit(pygame.transform.rotate(pygame.transform.scale(tempWin, (WIDTH, HEIGHT)), self.angle), (self.dest_x, self.dest_y))
         else:
             win.blit(pygame.transform.scale(tempWin, (WIDTH, HEIGHT)), (0, 0))
         pygame.display.update()
@@ -259,6 +262,7 @@ def run_game(trackpath):
     #computer_car.path = tmp
     computer_car.x, computer_car.y = player_car.x, player_car.y
     scale = 1
+    angle = 0.0
     dest_x, dest_y = 0, 0
     #loop principal
     while run:
@@ -270,8 +274,9 @@ def run_game(trackpath):
         #aqui
         i = 1
         while not game_info.ajusted:
-            blit_text_center(
-                WIN, MAIN_FONT, "Ajuste a tela com as setas !")
+            #blit_text_center(
+            #    WIN, MAIN_FONT, "Ajuste a tela com as setas !")
+            #pygame.display.update()
             keys = pygame.key.get_pressed()
             i += 1
             for event in pygame.event.get():
@@ -284,21 +289,26 @@ def run_game(trackpath):
                         imgs_info.set_dest(dest_x, dest_y)
                         images = images [:-1]
                         break
-                    elif keys[pygame.K_w]:
-                        scale += 0.1
-                    elif keys[pygame.K_s]:
-                        if scale > 0.2:
-                            scale -= 0.1
-                    elif keys[pygame.K_LEFT]:
+                    if keys[pygame.K_w]:
+                        scale += 0.01
+                    if keys[pygame.K_s]:
+                        if scale > 0.1:
+                            scale -= 0.01
+                    if keys[pygame.K_LEFT]:
                         dest_x -= 10
-                    elif keys[pygame.K_RIGHT]:
+                    if keys[pygame.K_RIGHT]:
                         dest_x += 10
-                    elif keys[pygame.K_UP]:
+                    if keys[pygame.K_UP]:
                         dest_y -= 10
-                    elif keys[pygame.K_DOWN]:
+                    if keys[pygame.K_DOWN]:
                         dest_y += 10
+                    if keys[pygame.K_j]:
+                        angle -= 1
+                    if keys[pygame.K_l]:
+                        angle += 1
                     #WIN = pygame.transform.scale(WIN, (WIDTH * scale, HEIGHT * scale))
                     imgs_info.set_dest(dest_x, dest_y)
+                    imgs_info.set_angle(angle)
                     imgs_info.draw(WIN, images, player_car, computer_car, game_info, int(WIDTH * scale), int(HEIGHT * scale), True)
                     #WIN.blit(pygame.transform.scale(WIN, (WIDTH * scale, HEIGHT * scale)), (dest_x,dest_y))
                     #pygame.display.update()
@@ -306,7 +316,7 @@ def run_game(trackpath):
 
         while not game_info.started:
             blit_text_center(
-                WIN, MAIN_FONT, "Aperte P para começar " + str(game_info.level) + "!")
+                WIN, MAIN_FONT, "Aperte P para começar !")
             pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

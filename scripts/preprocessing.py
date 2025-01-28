@@ -19,14 +19,15 @@ def preprocess(path, start):
     result[:,:,0:3] = img_resized[:,:,:] #copiando a imagem para o resultado
 
 
-    src = cv2.GaussianBlur(img_resized, (5, 5), 0) #suavização para elimanar ruídos
+    src = cv2.GaussianBlur(img_resized, (11, 11), 0) #suavização para elimanar ruídos
+    #src = img_resized
 
     img_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY) #conversão para escala de cinza
 
 
     #obtenção do gradiente em X e em Y    
-    grad_x = cv2.Sobel(img_gray, cv2.CV_16S, 1, 0, ksize=3, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
-    grad_y = cv2.Sobel(img_gray, cv2.CV_16S, 0, 1, ksize=3)
+    grad_x = cv2.Sobel(img_gray, cv2.CV_16S, 1, 0, ksize=5, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+    grad_y = cv2.Sobel(img_gray, cv2.CV_16S, 0, 1, ksize=5)
 
     #absoluto de cada gradiente
     abs_grad_x = cv2.convertScaleAbs(grad_x)

@@ -1,10 +1,11 @@
 from game.game import *
 from preprocessing import preprocess
+from tkinter import filedialog
 
 
 
 def prompt_file():
-    file_name = 'pictures/pista.jpg'
+    file_name = filedialog.askopenfilename(title="selecione a foto")
     return file_name
 
 
