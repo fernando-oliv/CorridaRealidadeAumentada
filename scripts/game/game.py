@@ -63,6 +63,7 @@ class ImagesInfos:
         self.FINISH_MASK = FINISH_MASK
         self.FINISH_POSITION = FINISH_POSITION
         self.parametros = None
+        self.angle = 0
 
     def set_dest(self, x, y):
         self.dest_x = x
