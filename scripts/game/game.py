@@ -262,9 +262,13 @@ def run_game(trackpath):
     computer_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 50, 4, 4, GREEN_CAR)
     #computer_car.path = tmp
     computer_car.x, computer_car.y = player_car.x, player_car.y
-    scale = 1
-    angle = 0.0
-    dest_x, dest_y = 0, 0
+    f = open("parametros.txt", "r")
+    print("escala do arq")
+    scale = float(f.readline())
+    angle = float(f.readline())
+    dest_x = float(f.readline())
+    dest_y = float(f.readline())
+    f.close()
     #loop principal
     while run:
         clock.tick(FPS)
@@ -288,7 +292,23 @@ def run_game(trackpath):
                         HEIGHT = scale * HEIGHT
                         game_info.ajusted = True
                         imgs_info.set_dest(dest_x, dest_y)
+                
                         images = images [:-1]
+                        print("escala = ", scale)
+                        print("dest_x = ", dest_x)
+                        print("dest_y = ", dest_y)
+                        print("angle = ", angle)
+                        f = open("parametros.txt", "w")
+                        f.writelines(str(scale)+"\n")
+                        f.writelines(str(angle)+"\n")
+                        f.writelines(str(dest_x)+"\n")
+                        f.writelines(str(dest_y)+"\n")
+                        f.close()
+                        RED_CAR = scale_image(RED_CAR, 0.55 / scale)
+                        player_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 40, 2.5, 4, RED_CAR)
+                        GREEN_CAR = scale_image(GREEN_CAR, 0.55 / scale)
+                        computer_car = PlayerCar(FINISH_POSITION[0] + 20 , FINISH_POSITION[1] - 40, 2.5, 4, GREEN_CAR)
+                        FINISH_POSITION = (FINISH_POSITION[0], FINISH_POSITION[1])
                         break
                     if keys[pygame.K_w]:
                         scale += 0.01
@@ -316,6 +336,7 @@ def run_game(trackpath):
                  
 
         while not game_info.started:
+            imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
             blit_text_center(
                 WIN, MAIN_FONT, "Aperte P para começar !")
             pygame.display.update()
@@ -327,6 +348,21 @@ def run_game(trackpath):
                     keys = pygame.key.get_pressed()
                     keys = keys[pygame.K_p]
                     if keys:
+                        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
+                        blit_text_center(WIN, MAIN_FONT, "3")
+                        pygame.display.update()
+                        time.sleep(1.0)
+                        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
+                        blit_text_center(WIN, MAIN_FONT, "2")
+                        pygame.display.update()
+                        time.sleep(1.0)
+                        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
+                        blit_text_center(WIN, MAIN_FONT, "1")
+                        pygame.display.update()
+                        time.sleep(1.0)
+                        imgs_info.draw(WIN, images, player_car, computer_car, game_info, WIDTH, HEIGHT, game_info.ajusted)
+                        blit_text_center(WIN, MAIN_FONT, "VAI")
+                        pygame.display.update()
                         game_info.start_level()
                         print(WIDTH, HEIGHT)
                     
@@ -343,10 +379,10 @@ def run_game(trackpath):
             blit_text_center(WIN, MAIN_FONT, game_info.player_vencedor + " ganhou a corrida")
             pygame.display.update()
             time.sleep(2.5)
-            #game_info.reset()
-            #player_car.reset()
-            #computer_car.reset()
-            run = False
+            game_info.reset()
+            player_car.reset()
+            computer_car.reset()
+            #run = False
 
     print("acabou aqui")
     pygame.quit()
