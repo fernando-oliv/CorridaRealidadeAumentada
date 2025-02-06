@@ -180,7 +180,7 @@ def handle_collision(player_car, computer_car, game_info, imgs_info):
 
 
     if computer_car.collide(imgs_info.TRACK_BORDER_MASK) != None:
-        computer_car.bounce(game_info.inputs[0], game_info.inputs[1])
+        computer_car.bounce(game_info.inputs2[0], game_info.inputs2[1])
 
     player_finish_poi_collide = computer_car.collide(
         imgs_info.FINISH_MASK, *imgs_info.FINISH_POSITION)
@@ -324,9 +324,9 @@ def run_game(trackpath):
                     if keys[pygame.K_DOWN]:
                         dest_y += 10
                     if keys[pygame.K_j]:
-                        angle -= 1
+                        angle -= 0.5
                     if keys[pygame.K_l]:
-                        angle += 1
+                        angle += 0.5
                     #WIN = pygame.transform.scale(WIN, (WIDTH * scale, HEIGHT * scale))
                     imgs_info.set_dest(dest_x, dest_y)
                     imgs_info.set_angle(angle)
