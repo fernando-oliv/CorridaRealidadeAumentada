@@ -10,5 +10,5 @@ def prompt_file():
 
 
 path = prompt_file()
-track = preprocess(path, (640, 100))
+track = preprocess(path)
 run_game(track)
